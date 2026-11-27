@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REDWAVE GRAM — 100% Real Online Clan, Video Drops & Voice Chat</title>
+  <meta name="theme-color" content="#09090b" />
+  <!-- Real-Time Online Multi-Device Cloud Sync -->
+  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #121216;
+      --card: #18181d;
+      --border: #27272a;
+      --text: #fafafa;
+      --muted: #a1a1aa;
+      --accent: #dc2626;
+      --accent-dark: #991b1b;
+      --accent-soft: rgba(220, 38, 38, 0.18);
+      --gold: #facc15;
+      --green: #22c55e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    .app-shell {
+      width: 100%;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 74px;
+    }
+
+    /* Sticky Top Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(9, 9, 11, 0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--accent);
+      padding: 11px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .rw-logo-box {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px var(--accent-soft);
+    }
+
+    .brand h1 {
+      font-size: 1.06rem;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+    }
+
+    .brand h1 span { color: var(--accent); }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .online-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+
+    .icon-pill {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.73rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      position: relative;
+    }
+
+    .notif-badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.62rem;
+      padding: 1px 5px;
+      border-radius: 99px;
+      display: none;
+    }
+
+    /* Main Container */
+    .container {
+      flex: 1;
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 12px;
+    }
+
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+
+    /* Status / Stories Strip */
+    .status-strip {
+      display: flex;
+      gap: 11px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      scrollbar-width: none;
+    }
+
+    .status-strip::-webkit-scrollbar { display: none; }
+
+    .status-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      min-width: 68px;
+      cursor: pointer;
+    }
+
+    .status-ring {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      padding: 2.5px;
+      background: linear-gradient(135deg, var(--accent), var(--gold));
+      position: relative;
+    }
+
+    .status-ring.add-ring {
+      background: #27272a;
+      border: 1.5px dashed var(--accent);
+    }
+
+    .status-ring img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--bg);
+      background: #27272a;
+    }
+
+    .status-name {
+      font-size: 0.69rem;
+      font-weight: 700;
+      color: #e4e4e7;
+      max-width: 68px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Feed Filter Pills */
+    .filter-row {
+      display: flex;
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+
+    .f-pill {
+      flex: 1;
+      background: var(--card);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 8px;
+      border-radius: 9px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .f-pill.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Post Cards */
+    .post-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .echo-banner {
+      background: var(--accent-soft);
+      color: #fca5a5;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .post-head {
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .post-user {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+      min-width: 0;
+    }
+
+    .avatar-sm {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid var(--accent);
+      background: #27272a;
+      flex-shrink: 0;
+    }
+
+    .join-clan-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 6px 11px;
+      border-radius: 7px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .join-clan-btn.joined {
+      background: #27272a;
+      color: #d4d4d8;
+      border: 1px solid #3f3f46;
+    }
+
+    .post-media {
+      width: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .post-media video,
+    .post-media img {
+      width: 100%;
+      max-height: 440px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .quote-card-media {
+      width: 100%;
+      min-height: 220px;
+      padding: 28px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 900;
+      line-height: 1.45;
+      color: #fff;
+    }
+
+    /* Action Buttons (HYPE, REPLY, ECHO, BLAST) */
+    .post-actions {
+      padding: 9px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      border-top: 1px solid var(--border);
+    }
+
+    .act-btn {
+      flex: 1;
+      background: #222228;
+      color: #e4e4e7;
+      border: 1px solid #2e2e36;
+      padding: 8px 5px;
+      border-radius: 9px;
+      font-size: 0.73rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .act-btn.hyped {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: #fca5a5;
+    }
+
+    .act-btn.echoed {
+      background: rgba(250, 204, 21, 0.16);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .post-caption {
+      padding: 0 12px 11px;
+      font-size: 0.83rem;
+      line-height: 1.45;
+      color: #e4e4e7;
+    }
+
+    .comment-box {
+      padding: 9px 12px 12px;
+      border-top: 1px solid var(--border);
+      background: #141418;
+      display: none;
+    }
+
+    .comment-item {
+      font-size: 0.77rem;
+      margin-bottom: 5px;
+      color: #d4d4d8;
+    }
+
+    /* Form Controls */
+    .field-lbl {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .inp {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+      outline: none;
+    }
+
+    .inp:focus { border-color: var(--accent); }
+
+    .btn-red {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 11px 15px;
+      border-radius: 10px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-dark {
+      background: #27272a;
+      color: #fff;
+      border: 1px solid #3f3f46;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Real Members Directory & Chat Rows */
+    .member-row {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 9px;
+    }
+
+    .chat-room {
+      display: none;
+      flex-direction: column;
+      background: var(--card);
+      border: 1.5px solid var(--accent);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .chat-messages {
+      height: 350px;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      background: #0e0e12;
+    }
+
+    .msg-bubble {
+      max-width: 80%;
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+
+    .msg-bubble.me {
+      align-self: flex-end;
+      background: var(--accent);
+      color: #fff;
+      border-bottom-right-radius: 3px;
+    }
+
+    .msg-bubble.them {
+      align-self: flex-start;
+      background: #27272a;
+      color: #fff;
+      border-bottom-left-radius: 3px;
+    }
+
+    .msg-bubble audio {
+      max-width: 210px;
+      height: 34px;
+      margin-top: 4px;
+    }
+
+    .chat-input-bar {
+      padding: 9px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .mic-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: #27272a;
+      color: #fff;
+      font-size: 1.05rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .mic-btn.recording {
+      background: var(--accent);
+      animation: pulseRec 0.9s infinite;
+    }
+
+    @keyframes pulseRec {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+
+    /* Profile Card */
+    .profile-hero {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .profile-pic-lg {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent);
+      margin-bottom: 8px;
+      background: #27272a;
+    }
+
+    .rank-pill {
+      display: inline-block;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      color: #fca5a5;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-top: 5px;
+    }
+
+    .clan-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      background: #09090b;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      margin: 12px 0;
+    }
+
+    .stat-box { cursor: pointer; }
+    .stat-num { font-size: 1.08rem; font-weight: 900; color: #fff; }
+    .stat-lbl { font-size: 0.68rem; font-weight: 800; color: #fca5a5; text-transform: uppercase; }
+
+    /* Empty State Box */
+    .empty-box {
+      background: var(--card);
+      border: 1.5px dashed var(--border);
+      border-radius: 14px;
+      padding: 26px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      background: rgba(12, 12, 15, 0.98);
+      backdrop-filter: blur(12px);
+      border-top: 2px solid var(--accent);
+      display: flex;
+      padding: 7px 4px;
+    }
+
+    .nav-item {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .nav-item.active { color: var(--accent); }
+
+    /* Full-Screen Auth & Modals */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgba(0, 0, 0, 0.9);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 410px;
+      background: var(--card);
+      border: 2px solid var(--accent);
+      border-radius: 16px;
+      padding: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="rw-logo-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12h3l3-8 4 16 4-12 3 4h3"/>
+          </svg>
+        </div>
+        <h1>REDWAVE <span>GRAM</span></h1>
+      </div>
+
+      <div class="header-actions">
+        <span class="icon-pill" title="Real-Time Online Sync Active"><span class="online-dot"></span> LIVE</span>
+        <button class="icon-pill" onclick="switchNav('alerts')">
+          🔔 <span id="notifCountBadge" class="notif-badge">0</span>
+        </button>
+        <button class="icon-pill" onclick="inviteFriendsShare()">🚀 Invite</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <!-- ================= VIEW 1: REAL-TIME HOME FEED ================= -->
+      <section id="view-feed" class="view-section active">
+        <!-- Real Members 24h Status Strip -->
+        <div id="statusStrip" class="status-strip"></div>
+
+        <!-- Feed Filter -->
+        <div class="filter-row">
+          <button class="f-pill active" id="filterAllBtn" onclick="setFeedFilter('all')">🌐 All Real Drops</button>
+          <button class="f-pill" id="filterAlliesBtn" onclick="setFeedFilter('allies')">🤝 My Allies Only</button>
+        </div>
+
+        <div id="feedContainer"></div>
+      </section>
+
+      <!-- ================= VIEW 2: DISCOVER REAL MEMBERS ================= -->
+      <section id="view-discover" class="view-section">
+        <div style="background:var(--card); border:1.5px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px;">
+          <h2 style="font-size:1rem; font-weight:900; margin-bottom:4px;">🔍 Real Clan Members Directory</h2>
+          <p style="font-size:0.75rem; color:var(--muted); margin-bottom:10px;">
+            Sirf real log jo link par aakar apni ID banayenge woh yahan dikhenge (Zero Bots).
+          </p>
+          <input type="text" id="memberSearchInput" class="inp" style="margin:0;" placeholder="Search real friend by name or @username..." oninput="renderRealMembersList()" />
+        </div>
+        <div id="realMembersContainer"></div>
+      </section>
+
+      <!-- ================= VIEW 3: CREATE POST / VIDEO / QUOTE ================= -->
+      <section id="view-create" class="view-section">
+        <div style="background:var(--card); border:1.5px solid var(--border); border-radius:14px; padding:15px;">
+          <h2 style="font-size:1.02rem; font-weight:900; margin-bottom:4px;">⚡ Create New Drop</h2>
+          <p style="font-size:0.75rem; color:var(--muted); margin-bottom:12px;">Apne real Clan ke saath Photo, Video ya Status Card share karein.</p>
+
+          <div class="filter-row">
+            <button class="f-pill active" id="modeMediaBtn" onclick="setCreateMode('media')">📸 Photo / Video</button>
+            <button class="f-pill" id="modeQuoteBtn" onclick="setCreateMode('quote')">✍️ Text / Quote Card</button>
+          </div>
+
+          <!-- Media Upload Box -->
+          <div id="createMediaBox">
+            <label class="field-lbl">Gallery se Photo ya Video chunein</label>
+            <input type="file" id="postMediaInput" accept="image/*,video/*" class="inp" onchange="previewCreateMedia(event)" />
+            <div id="createPreviewWrap" style="display:none; margin-bottom:10px; border-radius:10px; overflow:hidden; border:1px solid var(--border);">
+              <video id="createVidPreview" controls playsinline style="width:100%; max-height:240px; display:none;"></video>
+              <img id="createImgPreview" style="width:100%; max-height:240px; object-fit:cover; display:none;" alt="Preview" />
+            </div>
+          </div>
+
+          <!-- Text Quote Card Box -->
+          <div id="createQuoteBox" style="display:none;">
+            <label class="field-lbl">Card Background Style</label>
+            <select id="quoteBgSelect" class="inp">
+              <option value="linear-gradient(135deg, #7f1d1d, #09090b)">🔥 Crimson Dark</option>
+              <option value="linear-gradient(135deg, #1e3a8a, #09090b)">⚡ Cyber Midnight</option>
+              <option value="linear-gradient(135deg, #065f46, #09090b)">🌿 Emerald Matrix</option>
+              <option value="linear-gradient(135deg, #854d0e, #09090b)">👑 Royal Gold</option>
+            </select>
+            <label class="field-lbl">Card Text</label>
+            <textarea id="quoteCardText" class="inp" rows="3" placeholder="Card ke upar dikhne wala text likhein..."></textarea>
+          </div>
+
+          <label class="field-lbl">Caption & Hashtags</label>
+          <textarea id="postCaptionInput" class="inp" rows="2" placeholder="Kuch likhein... #RedwaveGram"></textarea>
+
+          <label class="field-lbl">Location Tag (Optional)</label>
+          <input type="text" id="postLocationInput" class="inp" placeholder="e.g. Jaipur, Rajasthan" />
+
+          <button class="btn-red" style="width:100%;" id="publishBtn" onclick="publishNewPost()">🚀 Publish Online Now</button>
+        </div>
+      </section>
+
+      <!-- ================= VIEW 4: REAL-TIME DIRECT & VOICE CHAT ================= -->
+      <section id="view-chat" class="view-section">
+        <div id="chatMemberListView">
+          <h2 style="font-size:1rem; font-weight:900; margin-bottom:4px;">💬 Direct & Voice Messages</h2>
+          <p style="font-size:0.75rem; color:var(--muted); margin-bottom:12px;">Kisi bhi real joined member ko text ya 🎙️ Voice Message bhejein:</p>
+          <div id="chatUsersContainer"></div>
+        </div>
+
+        <div id="chatRoomView" class="chat-room">
+          <div style="padding:10px 12px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:9px;">
+              <img id="chatPartnerPic" class="avatar-sm" src="" alt="User" />
+              <div>
+                <div id="chatPartnerName" style="font-size:0.88rem; font-weight:800;">Member</div>
+                <div id="chatPartnerHandle" style="font-size:0.68rem; color:#4ade80;">● Online Member</div>
+              </div>
+            </div>
+            <button class="btn-dark" style="padding:5px 10px; font-size:0.74rem;" onclick="closeChatRoom()">← Back</button>
+          </div>
+
+          <div id="chatMessagesBox" class="chat-messages"></div>
+
+          <div id="recStatusBanner" style="display:none; background:var(--accent); color:#fff; font-size:0.74rem; font-weight:800; text-align:center; padding:5px;">
+            🎙️ Recording Voice Note... Tap Mic again to Send!
+          </div>
+
+          <div class="chat-input-bar">
+            <button id="voiceRecBtn" class="mic-btn" onclick="toggleVoiceRecording()" title="Record Voice Message">🎙️</button>
+            <input type="text" id="chatTextInput" class="inp" style="margin:0; flex:1;" placeholder="Real message likhein..." onkeyup="if(event.key==='Enter') sendTextMessage()" />
+            <button class="btn-red" style="padding:9px 13px;" onclick="sendTextMessage()">Send</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW 5: NOTIFICATIONS / ALERTS ================= -->
+      <section id="view-alerts" class="view-section">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h2 style="font-size:1rem; font-weight:900;">🔔 Real Activity Alerts</h2>
+          <button class="btn-dark" style="padding:5px 10px; font-size:0.72rem;" onclick="clearAlerts()">Clear</button>
+        </div>
+        <div id="alertsContainer"></div>
+      </section>
+
+      <!-- ================= VIEW 6: MY PROFILE & SETTINGS ================= -->
+      <section id="view-profile" class="view-section">
+        <div class="profile-hero">
+          <img id="profAvatar" class="profile-pic-lg" src="" alt="Profile" />
+          <h2 id="profDisplayName" style="font-size:1.12rem; font-weight:900;">User</h2>
+          <div id="profHandle" style="font-size:0.78rem; color:#fca5a5; font-weight:700;">@handle</div>
+          <div id="profRankBadge" class="rank-pill">🌱 CLAN ROOKIE</div>
+          <p id="profBio" style="font-size:0.8rem; color:#d4d4d8; margin-top:8px; line-height:1.45;"></p>
+
+          <!-- 100% Real Stats (Starts at 0) -->
+          <div class="clan-stats">
+            <div class="stat-box">
+              <div class="stat-num" id="statPosts">0</div>
+              <div class="stat-lbl">🎬 Drops</div>
+            </div>
+            <div class="stat-box" onclick="showClanListModal('clan')">
+              <div class="stat-num" id="statClan">0</div>
+              <div class="stat-lbl">⚔️ Clan</div>
+            </div>
+            <div class="stat-box" onclick="showClanListModal('allies')">
+              <div class="stat-num" id="statAllies">0</div>
+              <div class="stat-lbl">🤝 Allies</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px;">
+            <button class="btn-dark" style="flex:1;" onclick="openSettingsDrawer()">⚙️ Edit Profile & Settings</button>
+            <button class="btn-red" style="flex:1;" onclick="inviteFriendsShare()">🚀 Share Link</button>
+          </div>
+        </div>
+
+        <!-- Settings Drawer inside Profile -->
+        <div id="settingsDrawer" style="display:none; background:var(--card); border:1.5px solid var(--accent); border-radius:14px; padding:15px; margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3 style="font-size:0.96rem; font-weight:900;">⚙️ Account & Theme Settings</h3>
+            <button class="btn-dark" style="padding:4px 9px; font-size:0.72rem;" onclick="document.getElementById('settingsDrawer').style.display='none'">✕</button>
+          </div>
+
+          <label class="field-lbl">Profile Photo Badlein</label>
+          <input type="file" accept="image/*" class="inp" onchange="updateProfilePhoto(event)" />
+
+          <label class="field-lbl">Display Name</label>
+          <input type="text" id="setNameInput" class="inp" />
+
+          <label class="field-lbl">Bio</label>
+          <textarea id="setBioInput" class="inp" rows="2"></textarea>
+
+          <label class="field-lbl">Studio Theme Color</label>
+          <select id="themeColorSelect" class="inp" onchange="changeStudioTheme(this.value)">
+            <option value="#dc2626">🔴 Redwave Crimson (Default)</option>
+            <option value="#2563eb">🔵 Cyber Electric Blue</option>
+            <option value="#16a34a">🟢 Matrix Neon Green</option>
+            <option value="#ca8a04">🟡 Royal Empire Gold</option>
+          </select>
+
+          <button class="btn-red" style="width:100%; margin-bottom:10px;" onclick="saveProfileSettings()">✅ Save Profile</button>
+          <button class="btn-dark" style="width:100%; color:#fca5a5;" onclick="logoutAccount()">🚪 Logout / Switch ID</button>
+        </div>
+
+        <h3 style="font-size:0.88rem; font-weight:800; margin-bottom:10px;">📌 Meri Real Posts & Echoes</h3>
+        <div id="myPostsContainer"></div>
+      </section>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" id="nav-feed" onclick="switchNav('feed')">
+        <span style="font-size:1.15rem;">🏠</span><span>Feed</span>
+      </button>
+      <button class="nav-item" id="nav-discover" onclick="switchNav('discover')">
+        <span style="font-size:1.15rem;">🔍</span><span>Real Clan</span>
+      </button>
+      <button class="nav-item" id="nav-create" onclick="switchNav('create')">
+        <span style="font-size:1.15rem;">➕</span><span>Drop</span>
+      </button>
+      <button class="nav-item" id="nav-chat" onclick="switchNav('chat')">
+        <span style="font-size:1.15rem;">💬</span><span>Chat</span>
+      </button>
+      <button class="nav-item" id="nav-profile" onclick="switchNav('profile')">
+        <span style="font-size:1.15rem;">👤</span><span>Profile</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- AUTH MODAL: CREATE REAL ID OR LOGIN -->
+  <div id="authModal" class="modal-bg">
+    <div class="modal-box">
+      <h2 style="font-size:1.08rem; font-weight:900; margin-bottom:4px;">🔥 REDWAVE GRAM Online</h2>
+      <p style="font-size:0.75rem; color:var(--muted); margin-bottom:12px;">
+        100% Real Platform (Zero Bots). Apni ID banayein ya purani ID login karein:
+      </p>
+
+      <div class="filter-row">
+        <button class="f-pill active" id="authTabSignup" onclick="switchAuthTab('signup')">✨ Create New ID</button>
+        <button class="f-pill" id="authTabLogin" onclick="switchAuthTab('login')">🔑 Login Existing ID</button>
+      </div>
+
+      <!-- Signup Form -->
+      <div id="signupFormBox">
+        <label class="field-lbl">Profile Picture Chunein</label>
+        <input type="file" id="regPic" accept="image/*" class="inp" />
+
+        <label class="field-lbl">Aapka Real Name</label>
+        <input type="text" id="regName" class="inp" placeholder="e.g. Redwave Creator" />
+
+        <label class="field-lbl">Unique Username (@id)</label>
+        <input type="text" id="regHandle" class="inp" placeholder="e.g. redwave_official" />
+
+        <label class="field-lbl">4-Digit Secret Passcode (Login ke liye)</label>
+        <input type="password" id="regPin" maxlength="4" class="inp" placeholder="e.g. 2580" />
+
+        <label class="field-lbl">Bio</label>
+        <input type="text" id="regBio" class="inp" value="⚡ Real Member on REDWAVE GRAM" />
+
+        <button class="btn-red" style="width:100%;" onclick="handleRealSignup()">🚀 Create Real ID & Join</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="loginFormBox" style="display:none;">
+        <label class="field-lbl">Apna Username (@id)</label>
+        <input type="text" id="loginHandle" class="inp" placeholder="@redwave_official" />
+
+        <label class="field-lbl">4-Digit Passcode</label>
+        <input type="password" id="loginPin" maxlength="4" class="inp" placeholder="****" />
+
+        <button class="btn-red" style="width:100%;" onclick="handleRealLogin()">🔓 Login to My ID</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS VIEWER MODAL -->
+  <div id="statusViewerModal" class="modal-bg" onclick="if(event.target===this) this.style.display='none'">
+    <div class="modal-box" style="text-align:center;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <b id="stViewUser" style="font-size:0.88rem;">@user</b>
+        <button class="btn-dark" style="padding:4px 9px;" onclick="document.getElementById('statusViewerModal').style.display='none'">✕</button>
+      </div>
+      <div id="stViewBody"></div>
+    </div>
+  </div>
+
+  <!-- ADD STATUS MODAL -->
+  <div id="addStatusModal" class="modal-bg" onclick="if(event.target===this) this.style.display='none'">
+    <div class="modal-box">
+      <h3 style="font-size:0.98rem; font-weight:900; margin-bottom:8px;">⚡ Post 24h Clan Status</h3>
+      <label class="field-lbl">Photo Chunein (Optional)</label>
+      <input type="file" id="stPhotoInput" accept="image/*" class="inp" />
+      <label class="field-lbl">Status Text Likhein</label>
+      <input type="text" id="stTextInput" class="inp" placeholder="Aaj kya chal raha hai?" />
+      <button class="btn-red" style="width:100%;" onclick="publishStatus()">🔥 Share Status</button>
+    </div>
+  </div>
+
+  <!-- CLAN / ALLIES LIST MODAL -->
+  <div id="clanListModal" class="modal-bg" onclick="if(event.target===this) this.style.display='none'">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 id="clanModalTitle" style="font-size:0.96rem; font-weight:900;">⚔️ Real Clan Members</h3>
+        <button class="btn-dark" style="padding:4px 9px;" onclick="document.getElementById('clanListModal').style.display='none'">✕</button>
+      </div>
+      <div id="clanModalBody" style="max-height:300px; overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ================= REAL-TIME ONLINE CLOUD DATABASE (GUN.JS + LOCAL CACHE) ================= */
+    const ROOM_KEY = 'REDWAVE_GRAM_REAL_ONLINE_V3_2026';
+    let gun = null;
+    let appNode = null;
+
+    try {
+      if (typeof Gun !== 'undefined') {
+        gun = Gun([
+          'https://relay.peer.ooo/gun',
+          'https://gun-manhattan.herokuapp.com/gun',
+          'https://peer.wallie.io/gun'
+        ]);
+        appNode = gun.get(ROOM_KEY);
+      }
+    } catch (e) {}
+
+    /* ================= STATE (100% REAL USERS ONLY - ZERO BOTS) ================= */
+    let usersMap = JSON.parse(localStorage.getItem('rwg_real_users') || '{}');
+    let postsMap = JSON.parse(localStorage.getItem('rwg_real_posts') || '{}');
+    let statusesMap = JSON.parse(localStorage.getItem('rwg_real_statuses') || '{}');
+    let alertsList = JSON.parse(localStorage.getItem('rwg_real_alerts') || '[]');
+    let chatsMap = JSON.parse(localStorage.getItem('rwg_real_chats') || '{}');
+
+    let myUid = localStorage.getItem('rwg_my_uid') || '';
+    let feedFilter = 'all';
+    let createMode = 'media';
+    let currentChatPartnerId = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let isRecording = false;
+
+    const makeDefaultAvatar = (txt) =>
+      `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' fill='%23dc2626'/%3E%3Ctext x='50%25' y='57%25' font-size='44' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='white'%3E${txt}%3C/text%3E%3C/svg%3E`;
+
+    /* ================= INIT & LIVE CLOUD LISTENERS ================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('rwg_theme');
+      if (savedTheme) changeStudioTheme(savedTheme, false);
+
+      startCloudListeners();
+
+      if (!myUid || !usersMap[myUid]) {
+        document.getElementById('authModal').style.display = 'flex';
+      } else {
+        refreshAllViews();
+      }
+    });
+
+    function startCloudListeners() {
+      if (!appNode) return;
+
+      // Sync Real Users
+      appNode.get('users').map().on((data, id) => {
+        if (!data || !data.handle) return;
+        usersMap[id] = {
+          id,
+          name: data.name,
+          handle: data.handle,
+          pin: data.pin,
+          bio: data.bio || '',
+          avatar: data.avatar || makeDefaultAvatar(data.name.slice(0, 2).toUpperCase()),
+          clan: JSON.parse(data.clanJson || '[]'),
+          allies: JSON.parse(data.alliesJson || '[]')
+        };
+        localStorage.setItem('rwg_real_users', JSON.stringify(usersMap));
+        if (myUid) {
+          renderStatusStrip();
+          renderRealMembersList();
+          renderChatDirectory();
+          renderProfile();
+        }
+      });
+
+      // Sync Real Posts
+      appNode.get('posts').map().on((data, id) => {
+        if (!data || !data.authorId) return;
+        postsMap[id] = {
+          id,
+          authorId: data.authorId,
+          authorName: data.authorName,
+          authorHandle: data.authorHandle,
+          authorAvatar: data.authorAvatar,
+          type: data.type,
+          mediaData: data.mediaData || '',
+          quoteBg: data.quoteBg || '',
+          quoteText: data.quoteText || '',
+          caption: data.caption || '',
+          location: data.location || '',
+          hypes: JSON.parse(data.hypesJson || '[]'),
+          echos: JSON.parse(data.echosJson || '[]'),
+          comments: JSON.parse(data.commentsJson || '[]'),
+          timestamp: data.timestamp || Date.now()
+        };
+        localStorage.setItem('rwg_real_posts', JSON.stringify(postsMap));
+        if (myUid) {
+          renderFeed();
+          renderProfile();
+        }
+      });
+
+      // Sync 24h Statuses
+      appNode.get('statuses').map().on((data, id) => {
+        if (!data || !data.userId) return;
+        if (Date.now() - (data.timestamp || 0) < 86400000) {
+          statusesMap[id] = data;
+          localStorage.setItem('rwg_real_statuses', JSON.stringify(statusesMap));
+          if (myUid) renderStatusStrip();
+        }
+      });
+
+      // Sync Direct Messages & Voice Notes
+      appNode.get('messages').map().on((data, id) => {
+        if (!data || !data.roomId || !data.senderId) return;
+        if (!chatsMap[data.roomId]) chatsMap[data.roomId] = {};
+        chatsMap[data.roomId][id] = data;
+        localStorage.setItem('rwg_real_chats', JSON.stringify(chatsMap));
+        if (currentChatPartnerId && getChatRoomId(myUid, currentChatPartnerId) === data.roomId) {
+          renderChatRoomMessages();
+        }
+      });
+    }
+
+    function getMe() {
+      return usersMap[myUid];
+    }
+
+    function syncUserToCloud(userObj) {
+      usersMap[userObj.id] = userObj;
+      localStorage.setItem('rwg_real_users', JSON.stringify(usersMap));
+      if (appNode) {
+        appNode.get('users').get(userObj.id).put({
+          name: userObj.name,
+          handle: userObj.handle,
+          pin: userObj.pin,
+          bio: userObj.bio,
+          avatar: userObj.avatar,
+          clanJson: JSON.stringify(userObj.clan || []),
+          alliesJson: JSON.stringify(userObj.allies || [])
+        });
+      }
+    }
+
+    function syncPostToCloud(postObj) {
+      postsMap[postObj.id] = postObj;
+      localStorage.setItem('rwg_real_posts', JSON.stringify(postsMap));
+      if (appNode) {
+        appNode.get('posts').get(postObj.id).put({
+          authorId: postObj.authorId,
+          authorName: postObj.authorName,
+          authorHandle: postObj.authorHandle,
+          authorAvatar: postObj.authorAvatar,
+          type: postObj.type,
+          mediaData: postObj.mediaData || '',
+          quoteBg: postObj.quoteBg || '',
+          quoteText: postObj.quoteText || '',
+          caption: postObj.caption || '',
+          location: postObj.location || '',
+          hypesJson: JSON.stringify(postObj.hypes || []),
+          echosJson: JSON.stringify(postObj.echos || []),
+          commentsJson: JSON.stringify(postObj.comments || []),
+          timestamp: postObj.timestamp
+        });
+      }
+    }
+
+    /* ================= AUTH: REAL SIGNUP & LOGIN ================= */
+    function switchAuthTab(tab) {
+      document.getElementById('signupFormBox').style.display = tab === 'signup' ? 'block' : 'none';
+      document.getElementById('loginFormBox').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('authTabSignup').classList.toggle('active', tab === 'signup');
+      document.getElementById('authTabLogin').classList.toggle('active', tab === 'login');
+    }
+
+    function handleRealSignup() {
+      const name = document.getElementById('regName').value.trim();
+      let handle = document.getElementById('regHandle').value.trim().replace(/\s+/g, '_').toLowerCase();
+      const pin = document.getElementById('regPin').value.trim();
+      const bio = document.getElementById('regBio').value.trim();
+      const file = document.getElementById('regPic').files[0];
+
+      if (!name || !handle || pin.length < 4) {
+        alert('⚠️ Naam, @username aur 4-digit passcode zaroori hai!');
+        return;
+      }
+      if (!handle.startsWith('@')) handle = '@' + handle;
+
+      const existing = Object.values(usersMap).find(u => u.handle === handle);
+      if (existing) {
+        alert('⚠️ Yeh @username pehle se kisi real member ne le liya hai! Doosra naam chunein.');
+        return;
+      }
+
+      const completeSignup = (avatarUrl) => {
+        const uid = 'usr_' + Date.now() + '_' + Math.floor(Math.random() * 999);
+        const newUser = {
+          id: uid,
+          name,
+          handle,
+          pin,
+          bio,
+          avatar: avatarUrl,
+          clan: [],   // 0 Real Followers initially
+          allies: []  // 0 Real Following initially
+        };
+        myUid = uid;
+        localStorage.setItem('rwg_my_uid', uid);
+        syncUserToCloud(newUser);
+        document.getElementById('authModal').style.display = 'none';
+        refreshAllViews();
+      };
+
+      if (file) {
+        compressImage(file, 220, 0.78, completeSignup);
+      } else {
+        completeSignup(makeDefaultAvatar(name.slice(0, 2).toUpperCase()));
+      }
+    }
+
+    function handleRealLogin() {
+      let handle = document.getElementById('loginHandle').value.trim().toLowerCase();
+      const pin = document.getElementById('loginPin').value.trim();
+      if (!handle.startsWith('@')) handle = '@' + handle;
+
+      const found = Object.values(usersMap).find(u => u.handle === handle && u.pin === pin);
+      if (!found) {
+        alert('❌ Galat @username ya Passcode! Agar pehli baar aaye ho toh "Create New ID" chunein.');
+        return;
+      }
+      myUid = found.id;
+      localStorage.setItem('rwg_my_uid', found.id);
+      document.getElementById('authModal').style.display = 'none';
+      refreshAllViews();
+    }
+
+    function logoutAccount() {
+      myUid = '';
+      localStorage.removeItem('rwg_my_uid');
+      document.getElementById('authModal').style.display = 'flex';
+    }
+
+    function compressImage(file, maxDim, quality, cb) {
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        c.width = img.width * scale;
+        c.height = img.height * scale;
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        cb(c.toDataURL('image/jpeg', quality));
+      };
+      img.src = URL.createObjectURL(file);
+    }
+
+    /* ================= NAVIGATION & REFRESH ================= */
+    function switchNav(tab) {
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      document.getElementById('view-' + tab).classList.add('active');
+      const navBtn = document.getElementById('nav-' + tab);
+      if (navBtn) navBtn.classList.add('active');
+
+      if (tab === 'feed') { renderStatusStrip(); renderFeed(); }
+      if (tab === 'discover') renderRealMembersList();
+      if (tab === 'chat') renderChatDirectory();
+      if (tab === 'alerts') renderAlerts();
+      if (tab === 'profile') renderProfile();
+    }
+
+    function refreshAllViews() {
+      renderStatusStrip();
+      renderFeed();
+      renderRealMembersList();
+      renderChatDirectory();
+      renderProfile();
+    }
+
+    /* ================= 24H REAL CLAN STATUS ================= */
+    function renderStatusStrip() {
+      const me = getMe();
+      if (!me) return;
+      const strip = document.getElementById('statusStrip');
+      const validStatuses = Object.values(statusesMap).filter(s => Date.now() - (s.timestamp || 0) < 86400000);
+
+      let html = `
+        <div class="status-node" onclick="document.getElementById('addStatusModal').style.display='flex'">
+          <div class="status-ring add-ring"><img src="${me.avatar}" alt="Add" /></div>
+          <div class="status-name">+ Your Status</div>
+        </div>
+      `;
+
+      html += validStatuses.map(st => `
+        <div class="status-node" onclick="viewStatus('${st.id}')">
+          <div class="status-ring"><img src="${st.userAvatar}" alt="${st.userName}" /></div>
+          <div class="status-name">${st.userName}</div>
+        </div>
+      `).join('');
+
+      strip.innerHTML = html;
+    }
+
+    function publishStatus() {
+      const me = getMe();
+      const file = document.getElementById('stPhotoInput').files[0];
+      const text = document.getElementById('stTextInput').value.trim();
+      if (!file && !text) { alert('⚠️ Photo ya Status text likhein!'); return; }
+
+      const finish = (imgData) => {
+        const sid = 'st_' + Date.now();
+        const stObj = {
+          id: sid,
+          userId: me.id,
+          userName: me.name,
+          userHandle: me.handle,
+          userAvatar: me.avatar,
+          image: imgData || '',
+          text: text || '🔥 Live on REDWAVE GRAM',
+          timestamp: Date.now()
+        };
+        statusesMap[sid] = stObj;
+        localStorage.setItem('rwg_real_statuses', JSON.stringify(statusesMap));
+        if (appNode) appNode.get('statuses').get(sid).put(stObj);
+
+        document.getElementById('stPhotoInput').value = '';
+        document.getElementById('stTextInput').value = '';
+        document.getElementById('addStatusModal').style.display = 'none';
+        renderStatusStrip();
+      };
+
+      if (file) compressImage(file, 480, 0.75, finish);
+      else finish('');
+    }
+
+    function viewStatus(sid) {
+      const st = statusesMap[sid];
+      if (!st) return;
+      document.getElementById('stViewUser').textContent = `${st.userName} (${st.userHandle})`;
+      document.getElementById('stViewBody').innerHTML = `
+        ${st.image ? `<img src="${st.image}" style="width:100%; border-radius:10px; margin-bottom:8px;" />` : ''}
+        <p style="font-size:0.95rem; font-weight:800;">${st.text}</p>
+      `;
+      document.getElementById('statusViewerModal').style.display = 'flex';
+    }
+
+    /* ================= CREATE POST (PHOTO / VIDEO / QUOTE) ================= */
+    function setCreateMode(m) {
+      createMode = m;
+      document.getElementById('createMediaBox').style.display = m === 'media' ? 'block' : 'none';
+      document.getElementById('createQuoteBox').style.display = m === 'quote' ? 'block' : 'none';
+      document.getElementById('modeMediaBtn').classList.toggle('active', m === 'media');
+      document.getElementById('modeQuoteBtn').classList.toggle('active', m === 'quote');
+    }
+
+    function previewCreateMedia(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const wrap = document.getElementById('createPreviewWrap');
+      const vid = document.getElementById('createVidPreview');
+      const img = document.getElementById('createImgPreview');
+      wrap.style.display = 'block';
+
+      if (file.type.startsWith('video/')) {
+        img.style.display = 'none';
+        vid.src = URL.createObjectURL(file);
+        vid.style.display = 'block';
+      } else {
+        vid.style.display = 'none';
+        img.src = URL.createObjectURL(file);
+        img.style.display = 'block';
+      }
+    }
+
+    function publishNewPost() {
+      const me = getMe();
+      const caption = document.getElementById('postCaptionInput').value.trim();
+      const location = document.getElementById('postLocationInput').value.trim();
+
+      if (createMode === 'quote') {
+        const qText = document.getElementById('quoteCardText').value.trim();
+        const qBg = document.getElementById('quoteBgSelect').value;
+        if (!qText) { alert('⚠️ Card text likhein!'); return; }
+
+        const postObj = {
+          id: 'pst_' + Date.now(),
+          authorId: me.id,
+          authorName: me.name,
+          authorHandle: me.handle,
+          authorAvatar: me.avatar,
+          type: 'quote',
+          quoteBg: qBg,
+          quoteText: qText,
+          caption: caption || qText,
+          location,
+          hypes: [],
+          echos: [],
+          comments: [],
+          timestamp: Date.now()
+        };
+        syncPostToCloud(postObj);
+        resetCreateForm();
+        switchNav('feed');
+        return;
+      }
+
+      const file = document.getElementById('postMediaInput').files[0];
+      if (!file) { alert('⚠️ Pehle Photo ya Video chunein!'); return; }
+
+      if (file.type.startsWith('image/')) {
+        compressImage(file, 640, 0.76, (dataUrl) => {
+          const postObj = {
+            id: 'pst_' + Date.now(),
+            authorId: me.id,
+            authorName: me.name,
+            authorHandle: me.handle,
+            authorAvatar: me.avatar,
+            type: 'image',
+            mediaData: dataUrl,
+            caption: caption || 'New Photo Drop 🔥',
+            location,
+            hypes: [],
+            echos: [],
+            comments: [],
+            timestamp: Date.now()
+          };
+          syncPostToCloud(postObj);
+          resetCreateForm();
+          switchNav('feed');
+        });
+      } else {
+        // Video handling (up to 4MB base64 cloud sync)
+        if (file.size > 4.5 * 1024 * 1024) {
+          alert('⚠️ Online fast sync ke liye 4.5 MB se chhota short video clip chunein!');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          const postObj = {
+            id: 'pst_' + Date.now(),
+            authorId: me.id,
+            authorName: me.name,
+            authorHandle: me.handle,
+            authorAvatar: me.avatar,
+            type: 'video',
+            mediaData: reader.result,
+            caption: caption || 'New Video Drop 🎬',
+            location,
+            hypes: [],
+            echos: [],
+            comments: [],
+            timestamp: Date.now()
+          };
+          syncPostToCloud(postObj);
+          resetCreateForm();
+          switchNav('feed');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function resetCreateForm() {
+      document.getElementById('postMediaInput').value = '';
+      document.getElementById('quoteCardText').value = '';
+      document.getElementById('postCaptionInput').value = '';
+      document.getElementById('postLocationInput').value = '';
+      document.getElementById('createPreviewWrap').style.display = 'none';
+    }
+
+    /* ================= FEED RENDERING & INTERACTIONS ================= */
+    function setFeedFilter(f) {
+      feedFilter = f;
+      document.getElementById('filterAllBtn').classList.toggle('active', f === 'all');
+      document.getElementById('filterAlliesBtn').classList.toggle('active', f === 'allies');
+      renderFeed();
+    }
+
+    function renderFeed(targetId = 'feedContainer', customList = null) {
+      const me = getMe();
+      if (!me) return;
+      const box = document.getElementById(targetId);
+
+      let list = customList || Object.values(postsMap).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      if (!customList && feedFilter === 'allies') {
+        list = list.filter(p => p.authorId === me.id || me.allies.includes(p.authorId));
+      }
+
+      if (list.length === 0) {
+        box.innerHTML = `
+          <div class="empty-box">
+            <div style="font-size:1.8rem; margin-bottom:6px;">🌐</div>
+            <b>Abhi tak koi Real Drop nahi hai!</b><br/>
+            Yeh 100% real platform hai (0 bots). Neeche <b>➕ Drop</b> dabakar apni pehli post dalein ya <b>🚀 Invite</b> se dosto ko link bhejein!
+          </div>
+        `;
+        return;
+      }
+
+      box.innerHTML = list.map(p => {
+        const isHyped = (p.hypes || []).includes(me.id);
+        const isEchoed = (p.echos || []).includes(me.id);
+        const isAlly = me.allies.includes(p.authorId);
+        const isMe = p.authorId === me.id;
+        const timeStr = new Date(p.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        let mediaHtml = '';
+        if (p.type === 'image') {
+          mediaHtml = `<img src="${p.mediaData}" alt="Drop" />`;
+        } else if (p.type === 'video') {
+          mediaHtml = `<video src="${p.mediaData}" controls playsinline loop></video>`;
+        } else {
+          mediaHtml = `<div class="quote-card-media" style="background:${p.quoteBg};">${p.quoteText}</div>`;
+        }
+
+        return `
+          <article class="post-card">
+            ${isEchoed ? `<div class="echo-banner">🔁 Echoed by ${me.handle}</div>` : ''}
+            <div class="post-head">
+              <div class="post-user" onclick="openDirectChatWith('${p.authorId}')">
+                <img class="avatar-sm" src="${p.authorAvatar}" alt="${p.authorName}" />
+                <div style="min-width:0;">
+                  <div style="font-size:0.86rem; font-weight:800;">${p.authorName}</div>
+                  <div style="font-size:0.7rem; color:var(--muted);">${p.authorHandle} ${p.location ? '• 📍 ' + p.location : ''} • ${timeStr}</div>
+                </div>
+              </div>
+              ${!isMe ? `<button class="join-clan-btn ${isAlly ? 'joined' : ''}" onclick="toggleJoinClan('${p.authorId}')">${isAlly ? '✓ In Clan' : '+ Join Clan'}</button>` : ''}
+            </div>
+
+            <div class="post-media">${mediaHtml}</div>
+
+            <div class="post-actions">
+              <button class="act-btn ${isHyped ? 'hyped' : ''}" onclick="toggleHype('${p.id}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="${isHyped ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.4">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                HYPE (${(p.hypes || []).length})
+              </button>
+
+              <button class="act-btn" onclick="toggleComments('${targetId}_${p.id}')">
+                💬 (${(p.comments || []).length})
+              </button>
+
+              <button class="act-btn ${isEchoed ? 'echoed' : ''}" onclick="toggleEcho('${p.id}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                  <path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                  <path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                </svg>
+                ECHO (${(p.echos || []).length})
+              </button>
+
+              <button class="act-btn" onclick="blastPost('${p.id}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                  <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                  <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                </svg>
+                BLAST
+              </button>
+            </div>
+
+            <div class="post-caption"><b>${p.authorHandle}</b> ${p.caption}</div>
+
+            <div class="comment-box" id="cbox_${targetId}_${p.id}">
+              ${(p.comments || []).map(c => `<div class="comment-item"><b>${c.user}:</b> ${c.text}</div>`).join('')}
+              <div style="display:flex; gap:6px; margin-top:6px;">
+                <input type="text" id="cinp_${targetId}_${p.id}" class="inp" style="margin:0; padding:7px 10px; font-size:0.78rem;" placeholder="Real reply likhein..." />
+                <button class="btn-red" style="padding:7px 12px; font-size:0.75rem;" onclick="addComment('${p.id}', '${targetId}_${p.id}')">Send</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function toggleHype(pid) {
+      const me = getMe();
+      const p = postsMap[pid];
+      if (!p) return;
+      if (!p.hypes) p.hypes = [];
+      const idx = p.hypes.indexOf(me.id);
+      if (idx === -1) {
+        p.hypes.push(me.id);
+        pushLocalAlert(`⚡ ${me.handle} hyped "${p.caption.slice(0, 25)}..."`);
+      } else {
+        p.hypes.splice(idx, 1);
+      }
+      syncPostToCloud(p);
+      renderFeed();
+    }
+
+    function toggleEcho(pid) {
+      const me = getMe();
+      const p = postsMap[pid];
+      if (!p) return;
+      if (!p.echos) p.echos = [];
+      const idx = p.echos.indexOf(me.id);
+      if (idx === -1) {
+        p.echos.push(me.id);
+        pushLocalAlert(`🔁 ${me.handle} echoed a drop!`);
+      } else {
+        p.echos.splice(idx, 1);
+      }
+      syncPostToCloud(p);
+      renderFeed();
+    }
+
+    function toggleComments(domKey) {
+      const el = document.getElementById('cbox_' + domKey);
+      if (el) el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function addComment(pid, domKey) {
+      const me = getMe();
+      const inp = document.getElementById('cinp_' + domKey);
+      const txt = inp.value.trim();
+      if (!txt) return;
+      const p = postsMap[pid];
+      if (!p.comments) p.comments = [];
+      p.comments.push({ user: me.handle, text: txt });
+      syncPostToCloud(p);
+      renderFeed();
+    }
+
+    function blastPost(pid) {
+      const p = postsMap[pid];
+      const text = `🔥 Check out ${p.authorName} (${p.authorHandle}) on REDWAVE GRAM: "${p.caption}"\n${window.location.href}`;
+      if (navigator.share) {
+        navigator.share({ title: 'REDWAVE GRAM', text, url: window.location.href }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(text);
+        alert('🚀 Post link copied! WhatsApp par dosto ko paste karke bhejein.');
+      }
+    }
+
+    /* ================= REAL CLAN JOINING (0 -> REAL NUMBERS) ================= */
+    function toggleJoinClan(targetUid) {
+      const me = getMe();
+      const target = usersMap[targetUid];
+      if (!me || !target || me.id === target.id) return;
+
+      const idx = me.allies.indexOf(targetUid);
+      if (idx === -1) {
+        me.allies.push(targetUid);
+        if (!target.clan.includes(me.id)) target.clan.push(me.id);
+        pushLocalAlert(`⚔️ ${me.handle} joined ${target.handle}'s Clan!`);
+      } else {
+        me.allies.splice(idx, 1);
+        target.clan = target.clan.filter(id => id !== me.id);
+      }
+
+      syncUserToCloud(me);
+      syncUserToCloud(target);
+      renderFeed();
+      renderRealMembersList();
+      renderProfile();
+    }
+
+    function renderRealMembersList() {
+      const me = getMe();
+      if (!me) return;
+      const q = (document.getElementById('memberSearchInput')?.value || '').trim().toLowerCase();
+      const box = document.getElementById('realMembersContainer');
+
+      const others = Object.values(usersMap).filter(u =>
+        u.id !== me.id &&
+        (!q || u.name.toLowerCase().includes(q) || u.handle.toLowerCase().includes(q))
+      );
+
+      if (others.length === 0) {
+        box.innerHTML = `
+          <div class="empty-box">
+            <b>Abhi tak koi doosra real member join nahi hua hai!</b><br/>
+            Upar <b>🚀 Invite</b> dabakar apne dosto ko link bhejein—jaise hi woh apni ID banayenge, unka naam yahan dikhega!
+          </div>
+        `;
+        return;
+      }
+
+      box.innerHTML = others.map(u => {
+        const isAlly = me.allies.includes(u.id);
+        return `
+          <div class="member-row">
+            <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+              <img class="avatar-sm" src="${u.avatar}" alt="${u.name}" />
+              <div style="min-width:0;">
+                <div style="font-size:0.88rem; font-weight:800;">${u.name}</div>
+                <div style="font-size:0.72rem; color:var(--muted);">${u.handle} • ⚔️ ${(u.clan || []).length} Clan</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-dark" style="padding:6px 10px; font-size:0.74rem;" onclick="openDirectChatWith('${u.id}')">💬</button>
+              <button class="join-clan-btn ${isAlly ? 'joined' : ''}" onclick="toggleJoinClan('${u.id}')">${isAlly ? '✓ Joined' : '+ Join'}</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ================= REAL-TIME 1-ON-1 CHAT & VOICE MESSAGES ================= */
+    function getChatRoomId(uid1, uid2) {
+      return [uid1, uid2].sort().join('__');
+    }
+
+    function renderChatDirectory() {
+      const me = getMe();
+      if (!me) return;
+      const box = document.getElementById('chatUsersContainer');
+      const others = Object.values(usersMap).filter(u => u.id !== me.id);
+
+      if (others.length === 0) {
+        box.innerHTML = `
+          <div class="empty-box">
+            <b>Chat karne ke liye abhi koi doosra member online nahi hai.</b><br/>
+            Apne dost ko website ka link bhejein—jab woh ID banayega toh aap dono yahan text aur 🎙️ Voice Notes bhej sakenge!
+          </div>
+        `;
+        return;
+      }
+
+      box.innerHTML = others.map(u => `
+        <div class="member-row" style="cursor:pointer;" onclick="openDirectChatWith('${u.id}')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <img class="avatar-sm" src="${u.avatar}" alt="${u.name}" />
+            <div>
+              <div style="font-size:0.88rem; font-weight:800;">${u.name}</div>
+              <div style="font-size:0.72rem; color:var(--muted);">${u.handle} • Tap for Text & Voice Chat</div>
+            </div>
+          </div>
+          <span style="color:var(--accent); font-weight:800; font-size:0.8rem;">🎙️ Open ➔</span>
+        </div>
+      `).join('');
+    }
+
+    function openDirectChatWith(partnerId) {
+      const partner = usersMap[partnerId];
+      if (!partner || partner.id === myUid) return;
+      currentChatPartnerId = partnerId;
+      switchNav('chat');
+      document.getElementById('chatMemberListView').style.display = 'none';
+      document.getElementById('chatRoomView').style.display = 'flex';
+      document.getElementById('chatPartnerPic').src = partner.avatar;
+      document.getElementById('chatPartnerName').textContent = partner.name;
+      document.getElementById('chatPartnerHandle').textContent = partner.handle;
+      renderChatRoomMessages();
+    }
+
+    function closeChatRoom() {
+      currentChatPartnerId = null;
+      document.getElementById('chatRoomView').style.display = 'none';
+      document.getElementById('chatMemberListView').style.display = 'block';
+    }
+
+    function renderChatRoomMessages() {
+      if (!currentChatPartnerId) return;
+      const roomId = getChatRoomId(myUid, currentChatPartnerId);
+      const msgs = Object.values(chatsMap[roomId] || {}).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+      const box = document.getElementById('chatMessagesBox');
+
+      if (msgs.length === 0) {
+        box.innerHTML = `<p style="color:#a1a1aa; text-align:center; font-size:0.78rem; margin-top:45px;">👋 Pehla real message ya 🎙️ Voice Message bhejein!</p>`;
+        return;
+      }
+
+      box.innerHTML = msgs.map(m => {
+        const isMe = m.senderId === myUid;
+        const tStr = new Date(m.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return `
+          <div class="msg-bubble ${isMe ? 'me' : 'them'}">
+            ${m.type === 'voice'
+              ? `<div>🎙️ Voice Message</div><audio controls src="${m.audioData}"></audio>`
+              : `<div>${m.text}</div>`}
+            <div style="font-size:0.62rem; opacity:0.75; margin-top:3px; text-align:right;">${tStr}</div>
+          </div>
+        `;
+      }).join('');
+
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function sendTextMessage() {
+      if (!currentChatPartnerId) return;
+      const inp = document.getElementById('chatTextInput');
+      const txt = inp.value.trim();
+      if (!txt) return;
+      inp.value = '';
+
+      const roomId = getChatRoomId(myUid, currentChatPartnerId);
+      const msgId = 'msg_' + Date.now() + '_' + Math.floor(Math.random() * 999);
+      const msgObj = {
+        id: msgId,
+        roomId,
+        senderId: myUid,
+        type: 'text',
+        text: txt,
+        timestamp: Date.now()
+      };
+
+      if (!chatsMap[roomId]) chatsMap[roomId] = {};
+      chatsMap[roomId][msgId] = msgObj;
+      localStorage.setItem('rwg_real_chats', JSON.stringify(chatsMap));
+      if (appNode) appNode.get('messages').get(msgId).put(msgObj);
+      renderChatRoomMessages();
+    }
+
+    async function toggleVoiceRecording() {
+      if (!currentChatPartnerId) return;
+      const btn = document.getElementById('voiceRecBtn');
+      const banner = document.getElementById('recStatusBanner');
+
+      if (isRecording && mediaRecorder) {
+        mediaRecorder.stop();
+        isRecording = false;
+        btn.classList.remove('recording');
+        banner.style.display = 'none';
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        recordedChunks = [];
+        // Compressed bitrate so voice notes sync online smoothly
+        mediaRecorder = new MediaRecorder(stream, { audioBitsPerSecond: 16000 });
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) recordedChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.onload = () => {
+            const roomId = getChatRoomId(myUid, currentChatPartnerId);
+            const msgId = 'vmsg_' + Date.now();
+            const msgObj = {
+              id: msgId,
+              roomId,
+              senderId: myUid,
+              type: 'voice',
+              audioData: reader.result,
+              timestamp: Date.now()
+            };
+            if (!chatsMap[roomId]) chatsMap[roomId] = {};
+            chatsMap[roomId][msgId] = msgObj;
+            localStorage.setItem('rwg_real_chats', JSON.stringify(chatsMap));
+            if (appNode) appNode.get('messages').get(msgId).put(msgObj);
+            renderChatRoomMessages();
+          };
+          reader.readAsDataURL(blob);
+        };
+
+        mediaRecorder.start();
+        isRecording = true;
+        btn.classList.add('recording');
+        banner.style.display = 'block';
+      } catch (e) {
+        alert('⚠️ Mic blocked hai (TrebEdit preview mein mic block hota hai—GitHub live link par Chrome mein 100% chalega!).');
+      }
+    }
+
+    /* ================= ALERTS, PROFILE & SETTINGS ================= */
+    function pushLocalAlert(text) {
+      alertsList.unshift({ text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+      localStorage.setItem('rwg_real_alerts', JSON.stringify(alertsList.slice(0, 30)));
+      const badge = document.getElementById('notifCountBadge');
+      badge.style.display = 'inline-block';
+      badge.textContent = alertsList.length;
+    }
+
+    function renderAlerts() {
+      document.getElementById('notifCountBadge').style.display = 'none';
+      const box = document.getElementById('alertsContainer');
+      if (alertsList.length === 0) {
+        box.innerHTML = '<div class="empty-box">Abhi koi naya alert nahi hai.</div>';
+        return;
+      }
+      box.innerHTML = alertsList.map(a => `
+        <div class="member-row">
+          <div style="font-size:0.82rem;">${a.text}</div>
+          <span style="font-size:0.68rem; color:var(--muted);">${a.time}</span>
+        </div>
+      `).join('');
+    }
+
+    function clearAlerts() {
+      alertsList = [];
+      localStorage.removeItem('rwg_real_alerts');
+      renderAlerts();
+    }
+
+    function renderProfile() {
+      const me = getMe();
+      if (!me) return;
+      document.getElementById('profAvatar').src = me.avatar;
+      document.getElementById('profDisplayName').textContent = me.name;
+      document.getElementById('profHandle').textContent = me.handle;
+      document.getElementById('profBio').textContent = me.bio;
+
+      const clanCount = (me.clan || []).length;
+      const alliesCount = (me.allies || []).length;
+      const myPosts = Object.values(postsMap)
+        .filter(p => p.authorId === me.id || (p.echos || []).includes(me.id))
+        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+      document.getElementById('statPosts').textContent = myPosts.length;
+      document.getElementById('statClan').textContent = clanCount;
+      document.getElementById('statAllies').textContent = alliesCount;
+
+      // Dynamic Real Clan Rank Badge
+      const rankEl = document.getElementById('profRankBadge');
+      if (clanCount >= 50) rankEl.textContent = '👑 CLAN LEGEND';
+      else if (clanCount >= 20) rankEl.textContent = '⚔️ CLAN WARLORD';
+      else if (clanCount >= 5) rankEl.textContent = '🔥 RISING CREATOR';
+      else rankEl.textContent = '🌱 CLAN ROOKIE';
+
+      renderFeed('myPostsContainer', myPosts);
+    }
+
+    function showClanListModal(which) {
+      const me = getMe();
+      const ids = which === 'clan' ? (me.clan || []) : (me.allies || []);
+      document.getElementById('clanModalTitle').textContent = which === 'clan' ? '⚔️ Real Clan Members' : '🤝 My Real Allies';
+      const body = document.getElementById('clanModalBody');
+
+      if (ids.length === 0) {
+        body.innerHTML = '<p style="color:#a1a1aa; text-align:center; padding:16px;">Abhi 0 members hain—link share karke real dosto ko jodein!</p>';
+      } else {
+        body.innerHTML = ids.map(uid => {
+          const u = usersMap[uid];
+          if (!u) return '';
+          return `
+            <div class="member-row">
+              <div style="display:flex; align-items:center; gap:9px;">
+                <img class="avatar-sm" src="${u.avatar}" alt="${u.name}" />
+                <div><b>${u.name}</b><br/><small style="color:#a1a1aa;">${u.handle}</small></div>
+              </div>
+              <button class="btn-dark" style="padding:5px 9px; font-size:0.72rem;" onclick="document.getElementById('clanListModal').style.display='none'; openDirectChatWith('${u.id}')">💬</button>
+            </div>
+          `;
+        }).join('');
+      }
+      document.getElementById('clanListModal').style.display = 'flex';
+    }
+
+    function openSettingsDrawer() {
+      const me = getMe();
+      document.getElementById('setNameInput').value = me.name;
+      document.getElementById('setBioInput').value = me.bio;
+      document.getElementById('settingsDrawer').style.display = 'block';
+    }
+
+    function updateProfilePhoto(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      compressImage(file, 220, 0.78, (dataUrl) => {
+        const me = getMe();
+        me.avatar = dataUrl;
+        syncUserToCloud(me);
+        renderProfile();
+        alert('✅ Profile Photo updated!');
+      });
+    }
+
+    function saveProfileSettings() {
+      const me = getMe();
+      me.name = document.getElementById('setNameInput').value.trim() || me.name;
+      me.bio = document.getElementById('setBioInput').value.trim();
+      syncUserToCloud(me);
+      document.getElementById('settingsDrawer').style.display = 'none';
+      renderProfile();
+      alert('✅ Profile Settings saved!');
+    }
+
+    function changeStudioTheme(hex, save = true) {
+      document.documentElement.style.setProperty('--accent', hex);
+      if (save) localStorage.setItem('rwg_theme', hex);
+    }
+
+    function inviteFriendsShare() {
+      const me = getMe();
+      const msg = `⚔️ Join my real Clan on REDWAVE GRAM!\nLink par click karo, apni ID banao aur mere saath videos & voice messages share karo:\n${window.location.href}`;
+      if (navigator.share) {
+        navigator.share({ title: 'REDWAVE GRAM', text: msg, url: window.location.href }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(msg);
+        alert('🚀 Invite link copy ho gaya! WhatsApp/Insta par dosto ko bhejein.');
+      }
+    }
+  </script>
+</body>
+</html>
