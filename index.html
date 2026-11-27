@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>REDWAVE GRAM — 100% Real Online Clan, Video Drops & Voice Chat</title>
   <meta name="theme-color" content="#09090b" />
-  <!-- Real-Time Online Multi-Device Cloud Sync -->
-  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+  <!-- Live 24/7 Real-Time Multi-Device Sync Engine -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
     :root {
       --bg: #09090b;
@@ -53,34 +53,35 @@
       background: rgba(9, 9, 11, 0.96);
       backdrop-filter: blur(12px);
       border-bottom: 2px solid var(--accent);
-      padding: 11px 15px;
+      padding: 11px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
     }
 
     .rw-logo-box {
-      width: 34px;
-      height: 34px;
+      width: 32px;
+      height: 32px;
       background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-      border-radius: 10px;
+      border-radius: 9px;
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 2px 10px var(--accent-soft);
+      flex-shrink: 0;
     }
 
     .brand h1 {
-      font-size: 1.06rem;
+      font-size: 1.02rem;
       font-weight: 900;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
     }
 
     .brand h1 span { color: var(--accent); }
@@ -88,14 +89,18 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
     }
 
-    .online-dot {
+    .status-dot {
       display: inline-block;
       width: 8px;
       height: 8px;
       border-radius: 50%;
+      background: #eab308;
+    }
+
+    .status-dot.connected {
       background: var(--green);
       box-shadow: 0 0 8px var(--green);
     }
@@ -104,15 +109,15 @@
       background: var(--card);
       border: 1px solid var(--border);
       color: #fff;
-      padding: 6px 10px;
+      padding: 6px 9px;
       border-radius: 999px;
-      font-size: 0.73rem;
+      font-size: 0.7rem;
       font-weight: 800;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      position: relative;
+      gap: 4px;
+      white-space: nowrap;
     }
 
     .notif-badge {
@@ -164,7 +169,6 @@
       border-radius: 50%;
       padding: 2.5px;
       background: linear-gradient(135deg, var(--accent), var(--gold));
-      position: relative;
     }
 
     .status-ring.add-ring {
@@ -191,7 +195,7 @@
       white-space: nowrap;
     }
 
-    /* Feed Filter Pills */
+    /* Filter Pills */
     .filter-row {
       display: flex;
       gap: 7px;
@@ -308,7 +312,7 @@
       color: #fff;
     }
 
-    /* Action Buttons (HYPE, REPLY, ECHO, BLAST) */
+    /* Action Buttons */
     .post-actions {
       padding: 9px 10px;
       display: flex;
@@ -553,12 +557,11 @@
     .stat-num { font-size: 1.08rem; font-weight: 900; color: #fff; }
     .stat-lbl { font-size: 0.68rem; font-weight: 800; color: #fca5a5; text-transform: uppercase; }
 
-    /* Empty State Box */
     .empty-box {
       background: var(--card);
       border: 1.5px dashed var(--border);
       border-radius: 14px;
-      padding: 26px 16px;
+      padding: 24px 16px;
       text-align: center;
       color: var(--muted);
       font-size: 0.82rem;
@@ -595,7 +598,7 @@
 
     .nav-item.active { color: var(--accent); }
 
-    /* Full-Screen Auth & Modals */
+    /* Modals */
     .modal-bg {
       display: none;
       position: fixed;
@@ -624,7 +627,7 @@
     <header class="header">
       <div class="brand">
         <div class="rw-logo-box">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M2 12h3l3-8 4 16 4-12 3 4h3"/>
           </svg>
         </div>
@@ -632,21 +635,22 @@
       </div>
 
       <div class="header-actions">
-        <span class="icon-pill" title="Real-Time Online Sync Active"><span class="online-dot"></span> LIVE</span>
+        <span class="icon-pill" onclick="forceResyncCloud()" title="Tap to refresh live sync">
+          <span id="connDot" class="status-dot"></span>
+          <span id="connText">SYNCING</span>
+        </span>
+        <button class="icon-pill" onclick="shareMyDirectIdCard()" title="Send your direct ID link to friend">📲 My ID</button>
         <button class="icon-pill" onclick="switchNav('alerts')">
           🔔 <span id="notifCountBadge" class="notif-badge">0</span>
         </button>
-        <button class="icon-pill" onclick="inviteFriendsShare()">🚀 Invite</button>
       </div>
     </header>
 
     <div class="container">
       <!-- ================= VIEW 1: REAL-TIME HOME FEED ================= -->
       <section id="view-feed" class="view-section active">
-        <!-- Real Members 24h Status Strip -->
         <div id="statusStrip" class="status-strip"></div>
 
-        <!-- Feed Filter -->
         <div class="filter-row">
           <button class="f-pill active" id="filterAllBtn" onclick="setFeedFilter('all')">🌐 All Real Drops</button>
           <button class="f-pill" id="filterAlliesBtn" onclick="setFeedFilter('allies')">🤝 My Allies Only</button>
@@ -658,16 +662,19 @@
       <!-- ================= VIEW 2: DISCOVER REAL MEMBERS ================= -->
       <section id="view-discover" class="view-section">
         <div style="background:var(--card); border:1.5px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px;">
-          <h2 style="font-size:1rem; font-weight:900; margin-bottom:4px;">🔍 Real Clan Members Directory</h2>
-          <p style="font-size:0.75rem; color:var(--muted); margin-bottom:10px;">
-            Sirf real log jo link par aakar apni ID banayenge woh yahan dikhenge (Zero Bots).
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <h2 style="font-size:1rem; font-weight:900;">🔍 Real Clan Members (<span id="onlineMemberCount">0</span>)</h2>
+            <button class="btn-dark" style="padding:4px 9px; font-size:0.7rem;" onclick="forceResyncCloud()">🔄 Refresh</button>
+          </div>
+          <p style="font-size:0.74rem; color:var(--muted); margin-bottom:10px;">
+            Jo bhi real dost link par apni ID banayega woh yahan dikhega:
           </p>
-          <input type="text" id="memberSearchInput" class="inp" style="margin:0;" placeholder="Search real friend by name or @username..." oninput="renderRealMembersList()" />
+          <input type="text" id="memberSearchInput" class="inp" style="margin:0;" placeholder="Search friend by name or @username (e.g. King SXT)..." oninput="renderRealMembersList()" />
         </div>
         <div id="realMembersContainer"></div>
       </section>
 
-      <!-- ================= VIEW 3: CREATE POST / VIDEO / QUOTE ================= -->
+      <!-- ================= VIEW 3: CREATE DROP ================= -->
       <section id="view-create" class="view-section">
         <div style="background:var(--card); border:1.5px solid var(--border); border-radius:14px; padding:15px;">
           <h2 style="font-size:1.02rem; font-weight:900; margin-bottom:4px;">⚡ Create New Drop</h2>
@@ -678,7 +685,6 @@
             <button class="f-pill" id="modeQuoteBtn" onclick="setCreateMode('quote')">✍️ Text / Quote Card</button>
           </div>
 
-          <!-- Media Upload Box -->
           <div id="createMediaBox">
             <label class="field-lbl">Gallery se Photo ya Video chunein</label>
             <input type="file" id="postMediaInput" accept="image/*,video/*" class="inp" onchange="previewCreateMedia(event)" />
@@ -688,7 +694,6 @@
             </div>
           </div>
 
-          <!-- Text Quote Card Box -->
           <div id="createQuoteBox" style="display:none;">
             <label class="field-lbl">Card Background Style</label>
             <select id="quoteBgSelect" class="inp">
@@ -705,17 +710,17 @@
           <textarea id="postCaptionInput" class="inp" rows="2" placeholder="Kuch likhein... #RedwaveGram"></textarea>
 
           <label class="field-lbl">Location Tag (Optional)</label>
-          <input type="text" id="postLocationInput" class="inp" placeholder="e.g. Jaipur, Rajasthan" />
+          <input type="text" id="postLocationInput" class="inp" placeholder="e.g. Bharatpur, Rajasthan" />
 
-          <button class="btn-red" style="width:100%;" id="publishBtn" onclick="publishNewPost()">🚀 Publish Online Now</button>
+          <button class="btn-red" style="width:100%;" onclick="publishNewPost()">🚀 Publish Online Now</button>
         </div>
       </section>
 
-      <!-- ================= VIEW 4: REAL-TIME DIRECT & VOICE CHAT ================= -->
+      <!-- ================= VIEW 4: DIRECT & VOICE CHAT ================= -->
       <section id="view-chat" class="view-section">
         <div id="chatMemberListView">
           <h2 style="font-size:1rem; font-weight:900; margin-bottom:4px;">💬 Direct & Voice Messages</h2>
-          <p style="font-size:0.75rem; color:var(--muted); margin-bottom:12px;">Kisi bhi real joined member ko text ya 🎙️ Voice Message bhejein:</p>
+          <p style="font-size:0.75rem; color:var(--muted); margin-bottom:12px;">Kisi bhi real joined member par tap karke text ya 🎙️ Voice Message bhejein:</p>
           <div id="chatUsersContainer"></div>
         </div>
 
@@ -745,7 +750,7 @@
         </div>
       </section>
 
-      <!-- ================= VIEW 5: NOTIFICATIONS / ALERTS ================= -->
+      <!-- ================= VIEW 5: ALERTS ================= -->
       <section id="view-alerts" class="view-section">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
           <h2 style="font-size:1rem; font-weight:900;">🔔 Real Activity Alerts</h2>
@@ -754,7 +759,7 @@
         <div id="alertsContainer"></div>
       </section>
 
-      <!-- ================= VIEW 6: MY PROFILE & SETTINGS ================= -->
+      <!-- ================= VIEW 6: PROFILE & SETTINGS ================= -->
       <section id="view-profile" class="view-section">
         <div class="profile-hero">
           <img id="profAvatar" class="profile-pic-lg" src="" alt="Profile" />
@@ -763,7 +768,6 @@
           <div id="profRankBadge" class="rank-pill">🌱 CLAN ROOKIE</div>
           <p id="profBio" style="font-size:0.8rem; color:#d4d4d8; margin-top:8px; line-height:1.45;"></p>
 
-          <!-- 100% Real Stats (Starts at 0) -->
           <div class="clan-stats">
             <div class="stat-box">
               <div class="stat-num" id="statPosts">0</div>
@@ -780,12 +784,12 @@
           </div>
 
           <div style="display:flex; gap:8px;">
-            <button class="btn-dark" style="flex:1;" onclick="openSettingsDrawer()">⚙️ Edit Profile & Settings</button>
-            <button class="btn-red" style="flex:1;" onclick="inviteFriendsShare()">🚀 Share Link</button>
+            <button class="btn-dark" style="flex:1;" onclick="openSettingsDrawer()">⚙️ Edit Profile</button>
+            <button class="btn-red" style="flex:1;" onclick="shareMyDirectIdCard()">📲 Share My ID</button>
           </div>
         </div>
 
-        <!-- Settings Drawer inside Profile -->
+        <!-- Settings Drawer -->
         <div id="settingsDrawer" style="display:none; background:var(--card); border:1.5px solid var(--accent); border-radius:14px; padding:15px; margin-bottom:14px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <h3 style="font-size:0.96rem; font-weight:900;">⚙️ Account & Theme Settings</h3>
@@ -857,10 +861,10 @@
         <input type="file" id="regPic" accept="image/*" class="inp" />
 
         <label class="field-lbl">Aapka Real Name</label>
-        <input type="text" id="regName" class="inp" placeholder="e.g. Redwave Creator" />
+        <input type="text" id="regName" class="inp" placeholder="e.g. Lakshit" />
 
         <label class="field-lbl">Unique Username (@id)</label>
-        <input type="text" id="regHandle" class="inp" placeholder="e.g. redwave_official" />
+        <input type="text" id="regHandle" class="inp" placeholder="e.g. lakshit_rw" />
 
         <label class="field-lbl">4-Digit Secret Passcode (Login ke liye)</label>
         <input type="password" id="regPin" maxlength="4" class="inp" placeholder="e.g. 2580" />
@@ -874,7 +878,7 @@
       <!-- Login Form -->
       <div id="loginFormBox" style="display:none;">
         <label class="field-lbl">Apna Username (@id)</label>
-        <input type="text" id="loginHandle" class="inp" placeholder="@redwave_official" />
+        <input type="text" id="loginHandle" class="inp" placeholder="@lakshit_rw" />
 
         <label class="field-lbl">4-Digit Passcode</label>
         <input type="password" id="loginPin" maxlength="4" class="inp" placeholder="****" />
@@ -919,21 +923,15 @@
   </div>
 
   <script>
-    /* ================= REAL-TIME ONLINE CLOUD DATABASE (GUN.JS + LOCAL CACHE) ================= */
-    const ROOM_KEY = 'REDWAVE_GRAM_REAL_ONLINE_V3_2026';
-    let gun = null;
-    let appNode = null;
+    /* ================= LIVE 24/7 REAL-TIME CLOUD SYNC (MQTT RETAINED BROKER) ================= */
+    const TOPIC_BASE = 'redwavegram/live2026/studios_v1';
+    const BROKERS = [
+      'wss://broker.emqx.io:8084/mqtt',
+      'wss://broker.hivemq.com:8884/mqtt'
+    ];
 
-    try {
-      if (typeof Gun !== 'undefined') {
-        gun = Gun([
-          'https://relay.peer.ooo/gun',
-          'https://gun-manhattan.herokuapp.com/gun',
-          'https://peer.wallie.io/gun'
-        ]);
-        appNode = gun.get(ROOM_KEY);
-      }
-    } catch (e) {}
+    let mqttClient = null;
+    let brokerIdx = 0;
 
     /* ================= STATE (100% REAL USERS ONLY - ZERO BOTS) ================= */
     let usersMap = JSON.parse(localStorage.getItem('rwg_real_users') || '{}');
@@ -953,12 +951,16 @@
     const makeDefaultAvatar = (txt) =>
       `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' fill='%23dc2626'/%3E%3Ctext x='50%25' y='57%25' font-size='44' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='white'%3E${txt}%3C/text%3E%3C/svg%3E`;
 
-    /* ================= INIT & LIVE CLOUD LISTENERS ================= */
+    /* ================= INIT & DIRECT ID IMPORT ================= */
     window.addEventListener('DOMContentLoaded', () => {
       const savedTheme = localStorage.getItem('rwg_theme');
       if (savedTheme) changeStudioTheme(savedTheme, false);
 
-      startCloudListeners();
+      // Check if opened via friend's direct "Share My ID" link
+      checkIncomingFriendLink();
+
+      // Connect to Live 24/7 Cloud Sync
+      connectLiveCloudBroker();
 
       if (!myUid || !usersMap[myUid]) {
         document.getElementById('authModal').style.display = 'flex';
@@ -967,78 +969,136 @@
       }
     });
 
-    function startCloudListeners() {
-      if (!appNode) return;
+    function checkIncomingFriendLink() {
+      const params = new URLSearchParams(window.location.search);
+      const fid = params.get('fid');
+      const fname = params.get('fname');
+      const fhandle = params.get('fhandle');
+      const fbio = params.get('fbio') || '⚡ Real Member on REDWAVE GRAM';
 
-      // Sync Real Users
-      appNode.get('users').map().on((data, id) => {
-        if (!data || !data.handle) return;
-        usersMap[id] = {
-          id,
-          name: data.name,
-          handle: data.handle,
-          pin: data.pin,
-          bio: data.bio || '',
-          avatar: data.avatar || makeDefaultAvatar(data.name.slice(0, 2).toUpperCase()),
-          clan: JSON.parse(data.clanJson || '[]'),
-          allies: JSON.parse(data.alliesJson || '[]')
+      if (fid && fname && fhandle && !usersMap[fid]) {
+        usersMap[fid] = {
+          id: fid,
+          name: fname,
+          handle: fhandle.startsWith('@') ? fhandle : '@' + fhandle,
+          pin: '',
+          bio: fbio,
+          avatar: makeDefaultAvatar(fname.slice(0, 2).toUpperCase()),
+          clan: [],
+          allies: []
         };
         localStorage.setItem('rwg_real_users', JSON.stringify(usersMap));
-        if (myUid) {
-          renderStatusStrip();
-          renderRealMembersList();
-          renderChatDirectory();
-          renderProfile();
-        }
-      });
+      }
+    }
 
-      // Sync Real Posts
-      appNode.get('posts').map().on((data, id) => {
-        if (!data || !data.authorId) return;
-        postsMap[id] = {
-          id,
-          authorId: data.authorId,
-          authorName: data.authorName,
-          authorHandle: data.authorHandle,
-          authorAvatar: data.authorAvatar,
-          type: data.type,
-          mediaData: data.mediaData || '',
-          quoteBg: data.quoteBg || '',
-          quoteText: data.quoteText || '',
-          caption: data.caption || '',
-          location: data.location || '',
-          hypes: JSON.parse(data.hypesJson || '[]'),
-          echos: JSON.parse(data.echosJson || '[]'),
-          comments: JSON.parse(data.commentsJson || '[]'),
-          timestamp: data.timestamp || Date.now()
-        };
-        localStorage.setItem('rwg_real_posts', JSON.stringify(postsMap));
-        if (myUid) {
-          renderFeed();
-          renderProfile();
-        }
-      });
+    function connectLiveCloudBroker() {
+      if (typeof mqtt === 'undefined') {
+        document.getElementById('connText').textContent = 'OFFLINE';
+        return;
+      }
 
-      // Sync 24h Statuses
-      appNode.get('statuses').map().on((data, id) => {
-        if (!data || !data.userId) return;
-        if (Date.now() - (data.timestamp || 0) < 86400000) {
-          statusesMap[id] = data;
-          localStorage.setItem('rwg_real_statuses', JSON.stringify(statusesMap));
-          if (myUid) renderStatusStrip();
-        }
-      });
+      const url = BROKERS[brokerIdx % BROKERS.length];
+      document.getElementById('connText').textContent = 'CONNECTING';
 
-      // Sync Direct Messages & Voice Notes
-      appNode.get('messages').map().on((data, id) => {
-        if (!data || !data.roomId || !data.senderId) return;
-        if (!chatsMap[data.roomId]) chatsMap[data.roomId] = {};
-        chatsMap[data.roomId][id] = data;
-        localStorage.setItem('rwg_real_chats', JSON.stringify(chatsMap));
-        if (currentChatPartnerId && getChatRoomId(myUid, currentChatPartnerId) === data.roomId) {
-          renderChatRoomMessages();
-        }
-      });
+      try {
+        mqttClient = mqtt.connect(url, {
+          clientId: 'rwg_' + Math.random().toString(16).slice(2, 10),
+          clean: true,
+          reconnectPeriod: 3000,
+          connectTimeout: 8000
+        });
+
+        mqttClient.on('connect', () => {
+          document.getElementById('connDot').classList.add('connected');
+          document.getElementById('connText').textContent = 'ONLINE';
+
+          // Subscribe to all retained users, posts, statuses & messages
+          mqttClient.subscribe(`${TOPIC_BASE}/users/+`, { qos: 1 });
+          mqttClient.subscribe(`${TOPIC_BASE}/posts/+`, { qos: 1 });
+          mqttClient.subscribe(`${TOPIC_BASE}/statuses/+`, { qos: 1 });
+          mqttClient.subscribe(`${TOPIC_BASE}/messages/+/+`, { qos: 1 });
+
+          // Broadcast my own profile immediately so friends see me right away!
+          if (myUid && usersMap[myUid]) {
+            publishRetained(`${TOPIC_BASE}/users/${myUid}`, usersMap[myUid]);
+          }
+        });
+
+        mqttClient.on('error', () => {
+          brokerIdx++;
+          document.getElementById('connDot').classList.remove('connected');
+          document.getElementById('connText').textContent = 'RETRYING';
+        });
+
+        mqttClient.on('offline', () => {
+          document.getElementById('connDot').classList.remove('connected');
+          document.getElementById('connText').textContent = 'OFFLINE';
+        });
+
+        mqttClient.on('message', (topic, payloadBuffer) => {
+          try {
+            const data = JSON.parse(payloadBuffer.toString());
+            if (!data) return;
+
+            if (topic.startsWith(`${TOPIC_BASE}/users/`)) {
+              const uid = data.id;
+              if (!uid || !data.handle) return;
+              const prev = usersMap[uid] || {};
+              usersMap[uid] = {
+                ...prev,
+                ...data,
+                clan: Array.from(new Set([...(prev.clan || []), ...(data.clan || [])])),
+                allies: uid === myUid ? (prev.allies || data.allies || []) : (data.allies || [])
+              };
+              localStorage.setItem('rwg_real_users', JSON.stringify(usersMap));
+              if (myUid) {
+                renderStatusStrip();
+                renderRealMembersList();
+                renderChatDirectory();
+                renderProfile();
+              }
+            } else if (topic.startsWith(`${TOPIC_BASE}/posts/`)) {
+              if (!data.id || !data.authorId) return;
+              postsMap[data.id] = data;
+              localStorage.setItem('rwg_real_posts', JSON.stringify(postsMap));
+              if (myUid) {
+                renderFeed();
+                renderProfile();
+              }
+            } else if (topic.startsWith(`${TOPIC_BASE}/statuses/`)) {
+              if (!data.id || Date.now() - (data.timestamp || 0) > 86400000) return;
+              statusesMap[data.id] = data;
+              localStorage.setItem('rwg_real_statuses', JSON.stringify(statusesMap));
+              if (myUid) renderStatusStrip();
+            } else if (topic.startsWith(`${TOPIC_BASE}/messages/`)) {
+              if (!data.roomId || !data.id) return;
+              if (!chatsMap[data.roomId]) chatsMap[data.roomId] = {};
+              chatsMap[data.roomId][data.id] = data;
+              localStorage.setItem('rwg_real_chats', JSON.stringify(chatsMap));
+              if (currentChatPartnerId && getChatRoomId(myUid, currentChatPartnerId) === data.roomId) {
+                renderChatRoomMessages();
+              }
+            }
+          } catch (err) {}
+        });
+      } catch (e) {}
+    }
+
+    function publishRetained(topic, obj) {
+      if (mqttClient && mqttClient.connected) {
+        mqttClient.publish(topic, JSON.stringify(obj), { retain: true, qos: 1 });
+      }
+    }
+
+    function forceResyncCloud() {
+      if (myUid && usersMap[myUid]) {
+        publishRetained(`${TOPIC_BASE}/users/${myUid}`, usersMap[myUid]);
+      }
+      if (mqttClient) {
+        mqttClient.subscribe(`${TOPIC_BASE}/users/+`, { qos: 1 });
+        mqttClient.subscribe(`${TOPIC_BASE}/posts/+`, { qos: 1 });
+      }
+      refreshAllViews();
     }
 
     function getMe() {
@@ -1048,40 +1108,13 @@
     function syncUserToCloud(userObj) {
       usersMap[userObj.id] = userObj;
       localStorage.setItem('rwg_real_users', JSON.stringify(usersMap));
-      if (appNode) {
-        appNode.get('users').get(userObj.id).put({
-          name: userObj.name,
-          handle: userObj.handle,
-          pin: userObj.pin,
-          bio: userObj.bio,
-          avatar: userObj.avatar,
-          clanJson: JSON.stringify(userObj.clan || []),
-          alliesJson: JSON.stringify(userObj.allies || [])
-        });
-      }
+      publishRetained(`${TOPIC_BASE}/users/${userObj.id}`, userObj);
     }
 
     function syncPostToCloud(postObj) {
       postsMap[postObj.id] = postObj;
       localStorage.setItem('rwg_real_posts', JSON.stringify(postsMap));
-      if (appNode) {
-        appNode.get('posts').get(postObj.id).put({
-          authorId: postObj.authorId,
-          authorName: postObj.authorName,
-          authorHandle: postObj.authorHandle,
-          authorAvatar: postObj.authorAvatar,
-          type: postObj.type,
-          mediaData: postObj.mediaData || '',
-          quoteBg: postObj.quoteBg || '',
-          quoteText: postObj.quoteText || '',
-          caption: postObj.caption || '',
-          location: postObj.location || '',
-          hypesJson: JSON.stringify(postObj.hypes || []),
-          echosJson: JSON.stringify(postObj.echos || []),
-          commentsJson: JSON.stringify(postObj.comments || []),
-          timestamp: postObj.timestamp
-        });
-      }
+      publishRetained(`${TOPIC_BASE}/posts/${postObj.id}`, postObj);
     }
 
     /* ================= AUTH: REAL SIGNUP & LOGIN ================= */
@@ -1120,8 +1153,8 @@
           pin,
           bio,
           avatar: avatarUrl,
-          clan: [],   // 0 Real Followers initially
-          allies: []  // 0 Real Following initially
+          clan: [],
+          allies: []
         };
         myUid = uid;
         localStorage.setItem('rwg_my_uid', uid);
@@ -1131,7 +1164,8 @@
       };
 
       if (file) {
-        compressImage(file, 220, 0.78, completeSignup);
+        // Keep avatar compact (~6KB) so live cloud sync happens in <100ms
+        compressImage(file, 120, 0.65, completeSignup);
       } else {
         completeSignup(makeDefaultAvatar(name.slice(0, 2).toUpperCase()));
       }
@@ -1149,6 +1183,7 @@
       }
       myUid = found.id;
       localStorage.setItem('rwg_my_uid', found.id);
+      syncUserToCloud(found);
       document.getElementById('authModal').style.display = 'none';
       refreshAllViews();
     }
@@ -1239,7 +1274,7 @@
         };
         statusesMap[sid] = stObj;
         localStorage.setItem('rwg_real_statuses', JSON.stringify(statusesMap));
-        if (appNode) appNode.get('statuses').get(sid).put(stObj);
+        publishRetained(`${TOPIC_BASE}/statuses/${sid}`, stObj);
 
         document.getElementById('stPhotoInput').value = '';
         document.getElementById('stTextInput').value = '';
@@ -1247,7 +1282,7 @@
         renderStatusStrip();
       };
 
-      if (file) compressImage(file, 480, 0.75, finish);
+      if (file) compressImage(file, 360, 0.65, finish);
       else finish('');
     }
 
@@ -1262,7 +1297,7 @@
       document.getElementById('statusViewerModal').style.display = 'flex';
     }
 
-    /* ================= CREATE POST (PHOTO / VIDEO / QUOTE) ================= */
+    /* ================= CREATE DROP ================= */
     function setCreateMode(m) {
       createMode = m;
       document.getElementById('createMediaBox').style.display = m === 'media' ? 'block' : 'none';
@@ -1326,7 +1361,7 @@
       if (!file) { alert('⚠️ Pehle Photo ya Video chunein!'); return; }
 
       if (file.type.startsWith('image/')) {
-        compressImage(file, 640, 0.76, (dataUrl) => {
+        compressImage(file, 540, 0.7, (dataUrl) => {
           const postObj = {
             id: 'pst_' + Date.now(),
             authorId: me.id,
@@ -1347,9 +1382,8 @@
           switchNav('feed');
         });
       } else {
-        // Video handling (up to 4MB base64 cloud sync)
-        if (file.size > 4.5 * 1024 * 1024) {
-          alert('⚠️ Online fast sync ke liye 4.5 MB se chhota short video clip chunein!');
+        if (file.size > 2.5 * 1024 * 1024) {
+          alert('⚠️ Live online sync ke liye 2.5 MB se chhota short video clip chunein!');
           return;
         }
         const reader = new FileReader();
@@ -1385,7 +1419,7 @@
       document.getElementById('createPreviewWrap').style.display = 'none';
     }
 
-    /* ================= FEED RENDERING & INTERACTIONS ================= */
+    /* ================= FEED RENDERING ================= */
     function setFeedFilter(f) {
       feedFilter = f;
       document.getElementById('filterAllBtn').classList.toggle('active', f === 'all');
@@ -1408,7 +1442,7 @@
           <div class="empty-box">
             <div style="font-size:1.8rem; margin-bottom:6px;">🌐</div>
             <b>Abhi tak koi Real Drop nahi hai!</b><br/>
-            Yeh 100% real platform hai (0 bots). Neeche <b>➕ Drop</b> dabakar apni pehli post dalein ya <b>🚀 Invite</b> se dosto ko link bhejein!
+            Yeh 100% real platform hai (0 bots). Neeche <b>➕ Drop</b> dabakar apni pehli post dalein ya <b>📲 My ID</b> se dost ko apna link bhejein!
           </div>
         `;
         return;
@@ -1540,16 +1574,17 @@
 
     function blastPost(pid) {
       const p = postsMap[pid];
-      const text = `🔥 Check out ${p.authorName} (${p.authorHandle}) on REDWAVE GRAM: "${p.caption}"\n${window.location.href}`;
+      const baseUrl = window.location.href.split('?')[0];
+      const text = `🔥 Check out ${p.authorName} (${p.authorHandle}) on REDWAVE GRAM: "${p.caption}"\n${baseUrl}`;
       if (navigator.share) {
-        navigator.share({ title: 'REDWAVE GRAM', text, url: window.location.href }).catch(() => {});
+        navigator.share({ title: 'REDWAVE GRAM', text, url: baseUrl }).catch(() => {});
       } else {
         navigator.clipboard.writeText(text);
-        alert('🚀 Post link copied! WhatsApp par dosto ko paste karke bhejein.');
+        alert('🚀 Post link copied!');
       }
     }
 
-    /* ================= REAL CLAN JOINING (0 -> REAL NUMBERS) ================= */
+    /* ================= REAL CLAN JOINING ================= */
     function toggleJoinClan(targetUid) {
       const me = getMe();
       const target = usersMap[targetUid];
@@ -1578,22 +1613,24 @@
       const q = (document.getElementById('memberSearchInput')?.value || '').trim().toLowerCase();
       const box = document.getElementById('realMembersContainer');
 
-      const others = Object.values(usersMap).filter(u =>
-        u.id !== me.id &&
-        (!q || u.name.toLowerCase().includes(q) || u.handle.toLowerCase().includes(q))
+      const allOthers = Object.values(usersMap).filter(u => u.id !== me.id);
+      document.getElementById('onlineMemberCount').textContent = allOthers.length;
+
+      const filtered = allOthers.filter(u =>
+        !q || u.name.toLowerCase().includes(q) || u.handle.toLowerCase().includes(q)
       );
 
-      if (others.length === 0) {
+      if (filtered.length === 0) {
         box.innerHTML = `
           <div class="empty-box">
-            <b>Abhi tak koi doosra real member join nahi hua hai!</b><br/>
-            Upar <b>🚀 Invite</b> dabakar apne dosto ko link bhejein—jaise hi woh apni ID banayenge, unka naam yahan dikhega!
+            <b>Abhi is naam se koi member nahi dikh raha hai.</b><br/>
+            Apne dost ko bolo ki woh ek baar page refresh kare ya upar <b>📲 My ID</b> dabakar apna direct link tumhe bhej de!
           </div>
         `;
         return;
       }
 
-      box.innerHTML = others.map(u => {
+      box.innerHTML = filtered.map(u => {
         const isAlly = me.allies.includes(u.id);
         return `
           <div class="member-row">
@@ -1605,7 +1642,7 @@
               </div>
             </div>
             <div style="display:flex; gap:6px;">
-              <button class="btn-dark" style="padding:6px 10px; font-size:0.74rem;" onclick="openDirectChatWith('${u.id}')">💬</button>
+              <button class="btn-dark" style="padding:6px 10px; font-size:0.74rem;" onclick="openDirectChatWith('${u.id}')">💬 Chat</button>
               <button class="join-clan-btn ${isAlly ? 'joined' : ''}" onclick="toggleJoinClan('${u.id}')">${isAlly ? '✓ Joined' : '+ Join'}</button>
             </div>
           </div>
@@ -1627,8 +1664,8 @@
       if (others.length === 0) {
         box.innerHTML = `
           <div class="empty-box">
-            <b>Chat karne ke liye abhi koi doosra member online nahi hai.</b><br/>
-            Apne dost ko website ka link bhejein—jab woh ID banayega toh aap dono yahan text aur 🎙️ Voice Notes bhej sakenge!
+            <b>Chat ke liye abhi koi doosra member nahi dikh raha hai.</b><br/>
+            Apne dost se uska <b>📲 My ID</b> link mangwayein—click karte hi woh yahan chat list mein aa jayega!
           </div>
         `;
         return;
@@ -1715,7 +1752,7 @@
       if (!chatsMap[roomId]) chatsMap[roomId] = {};
       chatsMap[roomId][msgId] = msgObj;
       localStorage.setItem('rwg_real_chats', JSON.stringify(chatsMap));
-      if (appNode) appNode.get('messages').get(msgId).put(msgObj);
+      publishRetained(`${TOPIC_BASE}/messages/${roomId}/${msgId}`, msgObj);
       renderChatRoomMessages();
     }
 
@@ -1735,8 +1772,7 @@
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         recordedChunks = [];
-        // Compressed bitrate so voice notes sync online smoothly
-        mediaRecorder = new MediaRecorder(stream, { audioBitsPerSecond: 16000 });
+        mediaRecorder = new MediaRecorder(stream, { audioBitsPerSecond: 14000 });
 
         mediaRecorder.ondataavailable = (e) => {
           if (e.data.size > 0) recordedChunks.push(e.data);
@@ -1760,7 +1796,7 @@
             if (!chatsMap[roomId]) chatsMap[roomId] = {};
             chatsMap[roomId][msgId] = msgObj;
             localStorage.setItem('rwg_real_chats', JSON.stringify(chatsMap));
-            if (appNode) appNode.get('messages').get(msgId).put(msgObj);
+            publishRetained(`${TOPIC_BASE}/messages/${roomId}/${msgId}`, msgObj);
             renderChatRoomMessages();
           };
           reader.readAsDataURL(blob);
@@ -1771,11 +1807,11 @@
         btn.classList.add('recording');
         banner.style.display = 'block';
       } catch (e) {
-        alert('⚠️ Mic blocked hai (TrebEdit preview mein mic block hota hai—GitHub live link par Chrome mein 100% chalega!).');
+        alert('⚠️ Chrome mein Mic permission Allow karein tabhi Voice Note record hoga!');
       }
     }
 
-    /* ================= ALERTS, PROFILE & SETTINGS ================= */
+    /* ================= ALERTS, PROFILE & DIRECT ID SHARE ================= */
     function pushLocalAlert(text) {
       alertsList.unshift({ text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
       localStorage.setItem('rwg_real_alerts', JSON.stringify(alertsList.slice(0, 30)));
@@ -1823,7 +1859,6 @@
       document.getElementById('statClan').textContent = clanCount;
       document.getElementById('statAllies').textContent = alliesCount;
 
-      // Dynamic Real Clan Rank Badge
       const rankEl = document.getElementById('profRankBadge');
       if (clanCount >= 50) rankEl.textContent = '👑 CLAN LEGEND';
       else if (clanCount >= 20) rankEl.textContent = '⚔️ CLAN WARLORD';
@@ -1869,7 +1904,7 @@
     function updateProfilePhoto(e) {
       const file = e.target.files[0];
       if (!file) return;
-      compressImage(file, 220, 0.78, (dataUrl) => {
+      compressImage(file, 120, 0.65, (dataUrl) => {
         const me = getMe();
         me.avatar = dataUrl;
         syncUserToCloud(me);
@@ -1893,16 +1928,20 @@
       if (save) localStorage.setItem('rwg_theme', hex);
     }
 
-    function inviteFriendsShare() {
+    function shareMyDirectIdCard() {
       const me = getMe();
-      const msg = `⚔️ Join my real Clan on REDWAVE GRAM!\nLink par click karo, apni ID banao aur mere saath videos & voice messages share karo:\n${window.location.href}`;
+      const baseUrl = window.location.href.split('?')[0];
+      const directUrl = `${baseUrl}?fid=${encodeURIComponent(me.id)}&fname=${encodeURIComponent(me.name)}&fhandle=${encodeURIComponent(me.handle)}&fbio=${encodeURIComponent(me.bio)}`;
+      const msg = `⚔️ Add me on REDWAVE GRAM!\nMeri ID (${me.name} / ${me.handle}) seedha open karne ke liye is link par click karo:\n${directUrl}`;
+
       if (navigator.share) {
-        navigator.share({ title: 'REDWAVE GRAM', text: msg, url: window.location.href }).catch(() => {});
+        navigator.share({ title: 'REDWAVE GRAM ID', text: msg, url: directUrl }).catch(() => {});
       } else {
         navigator.clipboard.writeText(msg);
-        alert('🚀 Invite link copy ho gaya! WhatsApp/Insta par dosto ko bhejein.');
+        alert('📲 Tumhara Direct ID Link copy ho gaya! WhatsApp par dost ko bhejo—click karte hi tumhari ID uske phone mein add ho jayegi.');
       }
     }
   </script>
 </body>
 </html>
+
